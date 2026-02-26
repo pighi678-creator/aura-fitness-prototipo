@@ -1,0 +1,95 @@
+{
+  "gyms": [
+    {
+      "id": 1,
+      "name": "Gold's Gym Roma",
+      "address": "Via della Camilluccia, 687 – Roma",
+      "capacity": 150,
+      "currentOccupancy": 65,
+      "phone": "+39 06 1234567",
+      "openHours": "06:00 – 23:00",
+      "amenities": ["Pesi liberi", "Cardio Zone", "Sala CrossFit", "Sauna", "Pool"]
+    }
+  ],
+  "occupancy": {
+    "gymId": 1,
+    "hourly": [
+      { "time": "06:00", "percent": 15, "people": 22 },
+      { "time": "07:00", "percent": 35, "people": 52 },
+      { "time": "08:00", "percent": 60, "people": 90 },
+      { "time": "09:00", "percent": 65, "people": 97 },
+      { "time": "10:00", "percent": 45, "people": 67 },
+      { "time": "11:00", "percent": 40, "people": 60 },
+      { "time": "12:00", "percent": 55, "people": 82 },
+      { "time": "13:00", "percent": 50, "people": 75 },
+      { "time": "14:00", "percent": 35, "people": 52 },
+      { "time": "15:00", "percent": 30, "people": 45 },
+      { "time": "16:00", "percent": 50, "people": 75 },
+      { "time": "17:00", "percent": 70, "people": 105 },
+      { "time": "18:00", "percent": 95, "people": 142 },
+      { "time": "19:00", "percent": 90, "people": 135 },
+      { "time": "20:00", "percent": 70, "people": 105 },
+      { "time": "21:00", "percent": 50, "people": 75 },
+      { "time": "22:00", "percent": 20, "people": 30 },
+      { "time": "23:00", "percent": 5,  "people": 7  }
+    ]
+  },
+  "workouts": {
+    "forza": {
+      "label": "Forza",
+      "duration": 60,
+      "focus": "Forza Massimale",
+      "exercises": [
+        { "name": "Squat (Bilanciere)", "sets": 5, "reps": 5, "rest": 180, "note": "RPE 8-9" },
+        { "name": "Stacco da Terra", "sets": 3, "reps": 5, "rest": 180, "note": "Focus sulla catena posteriore" },
+        { "name": "Panca Piana", "sets": 4, "reps": 6, "rest": 150, "note": "Pausa sul petto 1s" },
+        { "name": "Military Press", "sets": 3, "reps": 6, "rest": 120, "note": "" },
+        { "name": "Chin-Up Zavorra", "sets": 3, "reps": 5, "rest": 120, "note": "Presa supina" }
+      ]
+    },
+    "ipertrofia": {
+      "label": "Ipertrofia",
+      "duration": 55,
+      "focus": "Ipertrofia Muscolare",
+      "exercises": [
+        { "name": "Panca Piana (Bilanciere)", "sets": 4, "reps": 10, "rest": 90, "note": "Tecnica stretta controllata" },
+        { "name": "Trazioni alla Sbarra", "sets": 3, "reps": "MAX", "rest": 90, "note": "" },
+        { "name": "Affondi Posteriori", "sets": 3, "reps": 12, "rest": 75, "note": "Ogni gamba" },
+        { "name": "Croci ai Cavi (basso)", "sets": 3, "reps": 14, "rest": 60, "note": "" },
+        { "name": "Curl Bilanciere", "sets": 3, "reps": 12, "rest": 60, "note": "" }
+      ]
+    },
+    "endurance": {
+      "label": "Endurance",
+      "duration": 45,
+      "focus": "Resistenza Aerobica",
+      "exercises": [
+        { "name": "Running (tapis roulant)", "sets": 1, "reps": "20min", "rest": 0, "note": "Zona 2 – 65% FC max" },
+        { "name": "Burpees", "sets": 4, "reps": 15, "rest": 45, "note": "" },
+        { "name": "Salto con la Corda", "sets": 5, "reps": "1min", "rest": 30, "note": "" },
+        { "name": "Mountain Climbers", "sets": 3, "reps": "30s", "rest": 30, "note": "" },
+        { "name": "Plank", "sets": 3, "reps": "45s", "rest": 30, "note": "Mantieni addome contratto" }
+      ]
+    }
+  },
+  "exercises": [
+    { "id": 1, "name": "Panca Piana", "muscle": "petto", "equipment": "Bilanciere", "difficulty": "Intermedio", "emoji": "🏋️" },
+    { "id": 2, "name": "Trazioni alla Sbarra", "muscle": "schiena", "equipment": "Sbarra", "difficulty": "Intermedio", "emoji": "🤸" },
+    { "id": 3, "name": "Squat", "muscle": "gambe", "equipment": "Bilanciere", "difficulty": "Avanzato", "emoji": "🦵" },
+    { "id": 4, "name": "Military Press", "muscle": "spalle", "equipment": "Bilanciere", "difficulty": "Intermedio", "emoji": "💪" },
+    { "id": 5, "name": "Curl con Bilanciere", "muscle": "braccia", "equipment": "Bilanciere", "difficulty": "Principiante", "emoji": "💪" },
+    { "id": 6, "name": "Stacco da Terra", "muscle": "schiena", "equipment": "Bilanciere", "difficulty": "Avanzato", "emoji": "🏋️" },
+    { "id": 7, "name": "Plank", "muscle": "core", "equipment": "Corpo libero", "difficulty": "Principiante", "emoji": "🧘" },
+    { "id": 8, "name": "Affondi", "muscle": "gambe", "equipment": "Corpo libero", "difficulty": "Principiante", "emoji": "🦵" },
+    { "id": 9, "name": "Dip alle Parallele", "muscle": "petto", "equipment": "Parallele", "difficulty": "Intermedio", "emoji": "🏅" },
+    { "id": 10, "name": "Croci ai Cavi", "muscle": "petto", "equipment": "Cavo", "difficulty": "Principiante", "emoji": "🏋️" },
+    { "id": 11, "name": "Lat Machine", "muscle": "schiena", "equipment": "Macchina", "difficulty": "Principiante", "emoji": "💪" },
+    { "id": 12, "name": "Leg Press", "muscle": "gambe", "equipment": "Macchina", "difficulty": "Principiante", "emoji": "🦵" }
+  ],
+  "trainers": [
+    { "id": 1, "name": "Sara K.", "specialty": "HIIT Specialist", "rating": 4.9, "sessions": 142, "emoji": "👩‍🏫", "featured": true },
+    { "id": 2, "name": "Marco V.", "specialty": "Powerlifting", "rating": 4.8, "sessions": 98, "emoji": "🏋️", "featured": false },
+    { "id": 3, "name": "Luca B.", "specialty": "Calisthenics", "rating": 4.7, "sessions": 76, "emoji": "🤸", "featured": false },
+    { "id": 4, "name": "Giulia M.", "specialty": "Crossfit Coach", "rating": 4.9, "sessions": 203, "emoji": "🔥", "featured": false }
+  ]
+}

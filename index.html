@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description"
+    content="Aura Fitness – AI Coach personalizzato, affluenza live palestra, tracking progressi. La tua app fitness del futuro." />
+  <meta name="theme-color" content="#8b5cf6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Aura Fitness" />
+
+  <title>Aura Fitness | AI Coach & Smart Gym</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Tailwind (utility classes) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- jsPDF (PDF generation) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
+  <!-- Google Analytics 4 (placeholder – replace G-XXXXXXXX) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+</head>
+
+<body>
+
+  <!-- =====================================================
+         SPLASH SCREEN
+         ===================================================== -->
+  <div id="splash-screen" role="status" aria-label="Caricamento Aura Fitness">
+    <div class="splash-logo" aria-hidden="true">AURA</div>
+    <div class="splash-subtitle">Fitness Technology</div>
+    <div class="splash-loader" aria-hidden="true"></div>
+  </div>
+
+  <!-- =====================================================
+         AUTH MODAL (Login / Register)
+         ===================================================== -->
+  <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Accesso Aura Fitness">
+    <div class="modal-sheet glass-strong">
+      <div id="auth-form-container">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================
+         TIMER OVERLAY (Fullscreen countdown)
+         ===================================================== -->
+  <div id="timer-overlay" class="hidden" role="dialog" aria-modal="true" aria-label="Timer esercizio">
+
+    <!-- SVG gradient def -->
+    <svg width="0" height="0" aria-hidden="true">
+      <defs>
+        <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#8b5cf6" />
+          <stop offset="100%" stop-color="#ec4899" />
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- Close button -->
+    <button id="timer-close" class="timer-btn secondary" style="position:absolute;top:1.5rem;right:1.5rem"
+      aria-label="Chiudi timer">
+      <i data-lucide="x"></i>
+    </button>
+
+    <!-- Exercise name -->
+    <div class="text-center">
+      <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">recupero</p>
+      <h3 id="timer-exercise-name" class="text-lg font-black mt-1 gradient-text">Esercizio</h3>
+    </div>
+
+    <!-- Ring countdown -->
+    <div class="timer-ring">
+      <svg width="220" height="220" viewBox="0 0 220 220" aria-hidden="true">
+        <circle class="timer-ring-track" cx="110" cy="110" r="90" />
+        <circle class="timer-ring-progress" cx="110" cy="110" r="90" id="timer-ring-progress" stroke-dasharray="565.49"
+          stroke-dashoffset="0" />
+      </svg>
+      <div class="timer-display">
+        <div id="timer-time" class="timer-time" aria-live="polite">01:00</div>
+        <div class="timer-label">tempo rimasto</div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="timer-controls">
+      <button id="timer-reset" class="timer-btn secondary" aria-label="Ricomincia timer">
+        <i data-lucide="rotate-ccw"></i>
+      </button>
+      <button id="timer-play" class="timer-btn primary" aria-label="Avvia/pausa timer">
+        <span id="timer-play-icon">▶</span>
+      </button>
+      <button class="timer-btn secondary"
+        onclick="openTimer(90, document.getElementById('timer-exercise-name').textContent)"
+        aria-label="Aggiungi 30 secondi">
+        +30s
+      </button>
+    </div>
+
+    <p class="text-xs text-slate-600 text-center">Tocca ▶ per avviare · Esc per chiudere</p>
+  </div>
+
+  <!-- =====================================================
+         STICKY HEADER
+         ===================================================== -->
+  <header role="banner">
+    <div class="flex justify-between items-center max-w-[480px] mx-auto">
+      <!-- Logo -->
+      <div>
+        <h1 class="logo-text">AURA</h1>
+        <p class="text-[10px] text-purple-400 uppercase tracking-widest font-bold leading-none mt-0.5">
+          Fitness Technology
+        </p>
+      </div>
+
+      <!-- Header right: dark mode + profile -->
+      <div class="flex items-center gap-3">
+        <!-- Dark mode quick toggle -->
+        <button onclick="document.getElementById('toggle-darkmode').click()"
+          class="btn-icon bg-white/5 border border-white/10 text-slate-400 hover:text-white"
+          aria-label="Tema chiaro/scuro" title="Cambia tema">
+          <i data-lucide="moon" style="width:18px;height:18px"></i>
+        </button>
+
+        <!-- Profile avatar -->
+        <div class="profile-ring" onclick="handleProfileClick()" role="button" tabindex="0" aria-label="Profilo utente"
+          title="Profilo">
+          <div
+            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden cursor-pointer"
+            id="header-avatar">
+            <i data-lucide="user" class="text-slate-400" style="width:18px;height:18px"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- =====================================================
+         MAIN CONTENT (SPA Views)
+         ===================================================== -->
+  <main role="main" aria-label="Contenuto principale">
+
+    <!-- ========================
+           VIEW: DASHBOARD
+           ======================== -->
+    <section id="view-dashboard" class="view active" aria-label="Dashboard">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div class="flex justify-between items-start relative z-10">
+          <div>
+            <p class="text-xs text-purple-300 font-bold uppercase tracking-widest mb-1">
+              <span id="greeting-text">Buongiorno</span>
+            </p>
+            <h2 class="text-xl font-black leading-tight">
+              Ciao, <span id="welcome-name">atleta</span>! 👋
+            </h2>
+            <p id="today-date" class="text-sm text-slate-400 mt-0.5"></p>
+          </div>
+          <span class="streak-badge">
+            🔥 <span id="welcome-streak">5</span> giorni
+          </span>
+        </div>
+        <div class="mt-4 flex gap-3 relative z-10">
+          <div class="stat-item flex-1">
+            <div class="stat-value" id="tracker-sessions">8</div>
+            <div class="stat-label">Sessioni</div>
+          </div>
+          <div class="stat-item flex-1">
+            <div class="stat-value" id="tracker-calories">3.4k</div>
+            <div class="stat-label">Kcal</div>
+          </div>
+          <div class="stat-item flex-1">
+            <div class="stat-value" id="tracker-streak">5</div>
+            <div class="stat-label">Streak</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Occupancy Chart -->
+      <div class="glass card rounded-[2rem]" aria-label="Affluenza palestra">
+        <div class="flex justify-between items-start mb-5">
+          <div>
+            <h2 class="text-base font-bold">Affluenza Live</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Gold's Gym Roma</p>
+          </div>
+          <div class="live-badge" aria-label="In diretta">
+            <div class="live-dot" aria-hidden="true"></div>
+            Live
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="chart-container">
+          <canvas id="occupancyChart" aria-label="Grafico affluenza palestra per ora del giorno"></canvas>
+        </div>
+
+        <!-- Stats row -->
+        <div class="occupancy-stat mt-3">
+          <div class="stat-item">
+            <div class="stat-value" id="stat-current">–</div>
+            <div class="stat-label">Ora</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="stat-peak">–</div>
+            <div class="stat-label">Picco</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="stat-wait">–</div>
+            <div class="stat-label">Attesa</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Coach Card -->
+      <div class="glow-card" aria-label="Aura AI Coach">
+        <div class="glass card rounded-[2rem] relative z-10">
+          <!-- Badge -->
+          <div class="ai-badge">
+            <i data-lucide="sparkles" style="width:12px;height:12px"></i>
+            Aura AI Coach
+          </div>
+
+          <h2 class="text-xl font-black mb-1">Genera Workout</h2>
+          <p class="text-slate-400 text-sm mb-5">
+            Inserisci i tuoi dati biometrici e lascia che l'AI crei la scheda perfetta per te.
+          </p>
+
+          <!-- Biometric Inputs -->
+          <div class="biometric-inputs">
+            <div class="input-group">
+              <label for="bio-age">Età</label>
+              <input type="number" id="bio-age" placeholder="25" min="14" max="80" aria-label="Età" />
+            </div>
+            <div class="input-group">
+              <label for="bio-weight">Peso (kg)</label>
+              <input type="number" id="bio-weight" placeholder="75" min="30" max="200" aria-label="Peso in kg" />
+            </div>
+            <div class="input-group" style="grid-column:1/-1">
+              <label for="bio-goal">Obiettivo</label>
+              <select id="bio-goal" aria-label="Obiettivo allenamento">
+                <option value="ipertrofia">💪 Ipertrofia – Aumenta massa muscolare</option>
+                <option value="forza">🏋️ Forza – Massima potenza</option>
+                <option value="endurance">🏃 Endurance – Resistenza aerobica</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Generate Button -->
+          <button onclick="generateAIWorkout()" id="aiBtn" class="btn-primary"
+            aria-label="Genera scheda workout personalizzata">
+            <i data-lucide="sparkles" style="width:18px;height:18px" aria-hidden="true"></i>
+            Genera Scheda Personalizzata
+          </button>
+
+          <!-- AI Response Container -->
+          <div id="aiResponse" class="hidden mt-5 pt-5 border-t border-white/10"></div>
+        </div>
+      </div>
+
+      <!-- Personal Trainers -->
+      <div aria-label="Personal Trainer disponibili">
+        <div class="section-header">
+          <h3 class="section-title">Personal Trainer</h3>
+          <button class="section-link" onclick="showToast('Tutti i trainer disponibili presto!', '👥')"
+            aria-label="Vedi tutti i trainer">
+            Vedi tutti →
+          </button>
+        </div>
+        <div id="trainers-container" class="trainers-scroll" role="list" aria-label="Lista trainer">
+          <!-- Rendered by script.js -->
+          <div class="trainer-card featured">
+            <div class="trainer-avatar">👩‍🏫</div>
+            <p class="text-sm font-bold">Sara K.</p>
+            <p class="text-[10px] text-slate-400 mb-2">HIIT Specialist</p>
+            <div class="flex items-center justify-center gap-1">
+              <span class="text-yellow-400 text-xs">★</span>
+              <span class="text-xs font-bold">4.9</span>
+            </div>
+          </div>
+          <div class="trainer-card">
+            <div class="trainer-avatar">🏋️</div>
+            <p class="text-sm font-bold">Marco V.</p>
+            <p class="text-[10px] text-slate-400 mb-2">Powerlifting</p>
+            <div class="flex items-center justify-center gap-1">
+              <span class="text-yellow-400 text-xs">★</span>
+              <span class="text-xs font-bold">4.8</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+    <!-- /VIEW: DASHBOARD -->
+
+    <!-- ========================
+           VIEW: CALENDAR
+           ======================== -->
+    <section id="view-calendar" class="view" aria-label="Calendario workout">
+
+      <div class="glass card rounded-[2rem]">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-bold">📅 Calendario Workout</h2>
+          <span id="calendar-month" class="text-sm text-purple-400 font-bold"></span>
+        </div>
+
+        <!-- Day labels + calendar grid -->
+        <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="Calendario mensile"></div>
+
+        <!-- Legend -->
+        <div class="flex gap-3 mt-4 text-[11px] text-slate-500">
+          <div class="flex items-center gap-1.5">
+            <div class="w-3 h-3 rounded-sm bg-purple-600"></div> Oggi
+          </div>
+          <div class="flex items-center gap-1.5">
+            <div class="w-3 h-3 rounded-sm border border-purple-500/50"></div> Workout
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming sessions -->
+      <div>
+        <h3 class="section-title mb-3">Prossimi Allenamenti</h3>
+        <div class="space-y-2">
+          <div class="exercise-list-item">
+            <div class="icon-wrap"><span style="font-size:1.1rem">🏋️</span></div>
+            <div class="flex-1">
+              <p class="text-sm font-bold">Chest & Back Day</p>
+              <p class="text-xs text-slate-400">Domani · 09:00 · Gold's Gym Roma</p>
+            </div>
+            <button class="btn-secondary text-xs px-3 py-1.5" onclick="showToast('Promemoria impostato 🔔')">
+              Ricordami
+            </button>
+          </div>
+          <div class="exercise-list-item">
+            <div class="icon-wrap"><span style="font-size:1.1rem">🦵</span></div>
+            <div class="flex-1">
+              <p class="text-sm font-bold">Leg Day</p>
+              <p class="text-xs text-slate-400">Giovedì · 18:00 · Gold's Gym Roma</p>
+            </div>
+            <button class="btn-secondary text-xs px-3 py-1.5" onclick="showToast('Promemoria impostato 🔔')">
+              Ricordami
+            </button>
+          </div>
+          <div class="exercise-list-item">
+            <div class="icon-wrap"><span style="font-size:1.1rem">🏃</span></div>
+            <div class="flex-1">
+              <p class="text-sm font-bold">Cardio HIIT</p>
+              <p class="text-xs text-slate-400">Sabato · 08:00 · Gold's Gym Roma</p>
+            </div>
+            <button class="btn-secondary text-xs px-3 py-1.5" onclick="showToast('Promemoria impostato 🔔')">
+              Ricordami
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weekly progress chart -->
+      <div class="glass card rounded-[2rem]">
+        <div class="section-header mb-3">
+          <h3 class="section-title">Progressi Settimanali</h3>
+          <button id="export-csv-btn" class="section-link" aria-label="Esporta dati CSV">
+            ↓ CSV
+          </button>
+        </div>
+        <div class="chart-container" style="height:8rem">
+          <canvas id="weeklyChart" aria-label="Grafico progressi settimanali in minuti"></canvas>
+        </div>
+        <div class="chart-label-row">
+          <span>Lun</span><span>Mar</span><span>Mer</span>
+          <span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
+        </div>
+      </div>
+
+      <!-- Calories chart -->
+      <div class="glass card rounded-[2rem]">
+        <h3 class="section-title mb-3">🔥 Calorie Bruciate</h3>
+        <div class="chart-container" style="height:7rem">
+          <canvas id="caloriesChart" aria-label="Grafico calorie bruciate nella settimana"></canvas>
+        </div>
+        <div class="chart-label-row">
+          <span>Lun</span><span>Mar</span><span>Mer</span>
+          <span>Gio</span><span>Ven</span><span>Sab</span><span>Dom</span>
+        </div>
+      </div>
+
+    </section>
+    <!-- /VIEW: CALENDAR -->
+
+    <!-- ========================
+           VIEW: EXERCISES
+           ======================== -->
+    <section id="view-exercises" class="view" aria-label="Lista esercizi">
+
+      <!-- Quick timer CTA -->
+      <div class="glass card rounded-[2rem] text-center">
+        <div class="text-3xl mb-2">⏱</div>
+        <h3 class="font-black text-lg mb-1">Timer Allenamento</h3>
+        <p class="text-sm text-slate-400 mb-4">Avvia un countdown per il recupero tra i set</p>
+        <div class="flex gap-2 flex-wrap justify-center">
+          <button class="btn-secondary" onclick="openTimer(30, 'Recupero breve')"
+            aria-label="Timer 30 secondi">30s</button>
+          <button class="btn-secondary" onclick="openTimer(60, 'Recupero')" aria-label="Timer 60 secondi">60s</button>
+          <button class="btn-secondary" onclick="openTimer(90, 'Recupero medio')"
+            aria-label="Timer 90 secondi">90s</button>
+          <button class="btn-secondary" onclick="openTimer(120, 'Recupero forza')"
+            aria-label="Timer 2 minuti">2min</button>
+          <button class="btn-secondary" onclick="openTimer(180, 'Recupero forza massimale')"
+            aria-label="Timer 3 minuti">3min</button>
+        </div>
+      </div>
+
+      <!-- Exercise search -->
+      <div class="input-group">
+        <input type="search" placeholder="🔍 Cerca esercizio..." class="modal-input" style="margin-bottom:0"
+          oninput="filterExercises(this.value)" aria-label="Cerca esercizio" />
+      </div>
+
+      <!-- Exercises List -->
+      <div>
+        <div class="section-header">
+          <h3 class="section-title">Tutti gli Esercizi</h3>
+          <span class="text-xs text-slate-500">Tocca per timer →</span>
+        </div>
+        <div id="exercises-list" class="space-y-2" role="list" aria-label="Lista esercizi">
+          <!-- Rendered by script.js -->
+          <div class="empty-state">
+            <i data-lucide="dumbbell" style="width:40px;height:40px;margin:0 auto 0.5rem"></i>
+            <p class="text-sm">Caricamento esercizi...</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+    <!-- /VIEW: EXERCISES -->
+
+    <!-- ========================
+           VIEW: SETTINGS
+           ======================== -->
+    <section id="view-settings" class="view" aria-label="Impostazioni">
+
+      <!-- User profile card -->
+      <div class="glass card rounded-[2rem]" id="user-profile-card">
+        <div class="flex items-center gap-4 mb-5">
+          <div class="profile-ring p-0.5 rounded-full">
+            <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-2xl"
+              id="settings-avatar">🧑</div>
+          </div>
+          <div>
+            <h2 class="font-black text-lg" id="settings-username">Atleta Aura</h2>
+            <p class="text-sm text-slate-400" id="settings-email">—</p>
+          </div>
+        </div>
+
+        <!-- Profile form -->
+        <div class="space-y-3 mb-4">
+          <div class="biometric-inputs" style="grid-template-columns:1fr 1fr">
+            <div class="input-group">
+              <label for="profile-age">Età</label>
+              <input type="number" id="profile-age" placeholder="25" min="14" max="80" aria-label="Età profilo" />
+            </div>
+            <div class="input-group">
+              <label for="profile-weight">Peso (kg)</label>
+              <input type="number" id="profile-weight" placeholder="75" min="30" max="200" aria-label="Peso profilo" />
+            </div>
+            <div class="input-group">
+              <label for="profile-height">Altezza (cm)</label>
+              <input type="number" id="profile-height" placeholder="175" min="100" max="250"
+                aria-label="Altezza profilo" />
+            </div>
+            <div class="input-group">
+              <label for="profile-goal">Obiettivo</label>
+              <select id="profile-goal" aria-label="Obiettivo principale">
+                <option value="ipertrofia">💪 Ipertrofia</option>
+                <option value="forza">🏋️ Forza</option>
+                <option value="endurance">🏃 Endurance</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <button id="save-profile-btn" class="btn-primary" aria-label="Salva profilo">
+          <i data-lucide="save" style="width:16px;height:16px" aria-hidden="true"></i>
+          Salva Profilo
+        </button>
+      </div>
+
+      <!-- Settings toggles -->
+      <div class="space-y-3">
+        <h3 class="section-title">Preferenze</h3>
+
+        <div class="settings-item">
+          <div class="flex items-center gap-3">
+            <div class="btn-icon bg-purple-600/20 text-purple-400">
+              <i data-lucide="moon" style="width:16px;height:16px"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold">Dark Mode</p>
+              <p class="text-xs text-slate-500">Tema scuro sempre attivo</p>
+            </div>
+          </div>
+          <label class="toggle-switch" aria-label="Abilita dark mode">
+            <input type="checkbox" id="toggle-darkmode" checked />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="settings-item">
+          <div class="flex items-center gap-3">
+            <div class="btn-icon bg-pink-600/20 text-pink-400">
+              <i data-lucide="bell" style="width:16px;height:16px"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold">Notifiche Push</p>
+              <p class="text-xs text-slate-500">Promemoria allenamenti</p>
+            </div>
+          </div>
+          <label class="toggle-switch" aria-label="Abilita notifiche push">
+            <input type="checkbox" id="toggle-notifications" />
+            <span class="toggle-track"></span>
+          </label>
+        </div>
+
+        <div class="settings-item" onclick="exportTrackerCSV()">
+          <div class="flex items-center gap-3">
+            <div class="btn-icon bg-cyan-600/20 text-cyan-400">
+              <i data-lucide="download" style="width:16px;height:16px"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold">Esporta Dati</p>
+              <p class="text-xs text-slate-500">Scarica progressi in CSV</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="text-slate-600" style="width:16px;height:16px"></i>
+        </div>
+
+        <div class="settings-item"
+          onclick="if(navigator.share){navigator.share({title:'Aura Fitness',text:'Ho completato un workout con Aura! 💪',url:'https://aura.fitness'})}else{showToast('Copia il link manualmente','📋')}">
+          <div class="flex items-center gap-3">
+            <div class="btn-icon bg-indigo-600/20 text-indigo-400">
+              <i data-lucide="share-2" style="width:16px;height:16px"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold">Condividi App</p>
+              <p class="text-xs text-slate-500">Invita i tuoi amici</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="text-slate-600" style="width:16px;height:16px"></i>
+        </div>
+      </div>
+
+      <!-- App info -->
+      <div class="glass card rounded-[2rem] text-center">
+        <div class="logo-text text-2xl font-black mb-1">AURA</div>
+        <p class="text-xs text-slate-500 mb-1">Fitness Technology · v1.0.0</p>
+        <p class="text-[11px] text-slate-600 mb-4">Progetto ITS Digital Academy – 2026</p>
+        <button id="logout-btn" class="btn-secondary w-full justify-center" aria-label="Disconnetti account">
+          <i data-lucide="log-out" style="width:14px;height:14px" aria-hidden="true"></i>
+          Disconnetti
+        </button>
+      </div>
+
+    </section>
+    <!-- /VIEW: SETTINGS -->
+
+  </main>
+
+  <!-- =====================================================
+         BOTTOM NAVIGATION
+         ===================================================== -->
+  <nav class="bottom-nav" role="navigation" aria-label="Navigazione principale">
+    <button class="nav-item active" data-view="dashboard" aria-label="Dashboard" aria-current="page" title="Dashboard">
+      <i data-lucide="layout-grid"></i>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-item" data-view="calendar" aria-label="Calendario workout" title="Calendario">
+      <i data-lucide="calendar"></i>
+      <span class="nav-label">Calendario</span>
+    </button>
+    <button class="nav-item" data-view="exercises" aria-label="Lista esercizi e timer" title="Esercizi">
+      <i data-lucide="dumbbell"></i>
+      <span class="nav-label">Esercizi</span>
+    </button>
+    <button class="nav-item" data-view="settings" aria-label="Impostazioni e profilo" title="Impostazioni">
+      <i data-lucide="settings"></i>
+      <span class="nav-label">Profilo</span>
+    </button>
+  </nav>
+
+  <!-- =====================================================
+         MAIN SCRIPT
+         ===================================================== -->
+  <script src="script.js"></script>
+
+  <!-- Inline: exercise filter helper (small, no module overhead) -->
+  <script>
+    function filterExercises(query) {
+      const items = document.querySelectorAll(".exercise-list-item");
+      const q = query.toLowerCase();
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? "" : "none";
+      });
+    }
+
+    // Sync profile avatar/name in settings when user logs in
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = JSON.parse(localStorage.getItem("aura_user") || "null");
+      if (user) {
+        const ua = document.getElementById("settings-avatar");
+        const un = document.getElementById("settings-username");
+        const ue = document.getElementById("settings-email");
+        if (ua) ua.textContent = user.avatar || "🧑";
+        if (un) un.textContent = user.name || "Atleta";
+        if (ue) ue.textContent = user.email || "—";
+        const wn = document.getElementById("welcome-name");
+        if (wn) wn.textContent = (user.name || "atleta").split(" ")[0];
+      }
+    });
+  </script>
+
+</body>
+
+</html>
