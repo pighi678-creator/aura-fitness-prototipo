@@ -150,3 +150,5 @@ POST /api/progress   → Salva progressi
 - [ ] Video esercizi (embedded YouTube)
 - [ ] Classifica amici & social features
 - [ ] Apple Watch companion app
+
+All rights reserved
